@@ -11,7 +11,7 @@
 struct {
 	const char VT[5]={
 	//VT终结符集合 
-	'0','1'		//,EMPTY
+	'(',')'		,EMPTY
 	};
 	const char VN[5]={
 	//非终结符集合 
@@ -19,14 +19,10 @@ struct {
 	};
 	char *P[3][3]={
 	//产生式（按照VN中元素的顺序定义） 
-		 
 		{//VN[0]的产生式集合		
-		"01","0S1"
-		
-		
-		//"(S)",""
+//		"01","0S1"
+		"(S)",""
 		}
-		
 		/*
 		,
 		{// VN[1]的产生式集合 
@@ -39,7 +35,6 @@ struct {
 		//.............
 	};
 	const char S = 'S';
-	
 	unsigned char HashMap[256]={0};
 	
 	
@@ -57,8 +52,6 @@ struct {
 			else return HashMap[c]-1; 
 	}
 	
-	
-	
 	bool initHashMap(){
 		/* 
 			哈希表应当具备如下能力：
@@ -68,7 +61,6 @@ struct {
 			元素不属于集合 则为0   元素属于VT则<128  元素属于VN则>=128
 			若c属于VN  则HashMap[c]-128为c在VN中的位置  
 			若c属于VT  则HashMap[c]-1为c在VT中的位置   (避开0)
-			
 		*/
 		//哈希表位置为空则可以写入，否则元素重复   报错 
 		for(int i=0;*(VT+i);i++)
@@ -93,7 +85,7 @@ struct {
 		//函数测试 
 		showVT();
 		showVN();
-		DerivationL("00001111","S");
+		DerivationL("((((S))))","S");
 		//--------- 
 		
 		
@@ -128,12 +120,32 @@ struct {
 //		return false;
 //	};
 //	
-
-
 	//最左推导  最左推导出Rstr Rlen为结果字符串长度  S为起始符    输出推导过程 
+	
 	void DerivationL(const char * Rstr,char * S){
-		/*	*Rstr 为目标串   *S当前串 
-		*/
+		printf("Rstr:%s  S=%s \n",Rstr,S);
+		if(strlen(Rstr)<strlen(S)+1)return;
+		for(int i=0;Rstr[i]&&S[i];i++){
+			if(Rstr[i]==S[i])continue;
+			else if(checkSet(Rstr[i])==1 && checkSet(S[i])==1)break;
+			else if(checkSet(S[i])==2){
+				char p[255]={0};
+				for(int j=0;P[index(S[i])][j];j++){
+						memset(p,0,sizeof(p));
+						strcpy(p,S) ;
+						strcpy(p+i,P[index(S[i])][j]);
+						strcat(p,S+i+1);
+						DerivationL(Rstr,p) ;	
+					
+					
+				}
+			}
+		}
+	}
+	/*
+	void DerivationL(const char * Rstr,char * S){
+		//	*Rstr 为目标串   *S当前串 
+		
 		puts("进入");
 		printf("Rstr = %s\nS = %s\n----------------\n",Rstr,S);
 		
@@ -141,7 +153,7 @@ struct {
 		
 		 if(strlen(Rstr)<strlen(S))return ;//正在推导的串串长不能长于结果串
 		 
-		 printf("fadsfsad");
+		 
 		 for(int i=0;Rstr[i]&&S[i];i++){
 		 	printf("Rstr[i] = %c  S[i] = %c  i = %d \n------------------\n",Rstr[i],S[i],i);
 		 	
@@ -156,7 +168,8 @@ struct {
 				 	
 //				 	printf("--Rstr=%s  %s\n",Rstr,strcat(P[index(*S)][j],(S+1)));
 //				 	puts("--进入递归");
-					printf("J = %d\n",j);
+					printf("J = %d →%s \n",j,P[index(S[i])][j]);
+					
 					if(*P[index(S[i])][j]==EMPTY){
 						puts("进入1234");
 						DerivationL(Rstr,S+i+1)	;						 		
@@ -168,6 +181,7 @@ struct {
 //				 		printf("%s  -   %s   ?   %s\n",Rstr+i,P[index(S[i])][j],(S+i+1));
 				 			char p[255]="";
 				 			strcat(p,P[index(S[i])][j]);
+				 			puts(p) ;
 							puts("崩溃之前1");				 		
 				 			DerivationL(Rstr+i,strcat(p,(S+i+1)))	;
 				 			puts("出来之前1");				 		
@@ -184,11 +198,8 @@ struct {
 			 }
 		 }
 		 puts("退出来了");
-	}
-	
-	
-	
-	
+	}	
+	*/
 	//最右推导 
 	void DerivationR(const char * str){
 		
@@ -201,15 +212,6 @@ struct {
 	void StatuteR(const char * str){
 	
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	void showVT() {
 		puts("VT 集合的内容为：");
@@ -239,11 +241,7 @@ struct {
 			case 1025:puts("检索失败，此元素不存在") ;break; 
 			
 			
-			
-			
-			
-			
-			
+					
 			default :printf("程序崩溃，错误代码%x\n",err);
 		}
 		
