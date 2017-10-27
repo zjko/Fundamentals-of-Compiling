@@ -17,11 +17,11 @@ struct {
 	//非终结符集合 
 	'S'
 	};
-	char *P[3][3]={
+	char *P[5][5]={
 	//产生式（按照VN中元素的顺序定义） 
 		{//VN[0]的产生式集合		
 //		"01","0S1"
-		"(S)",""
+		"(S)","","-END"
 		}
 		/*
 		,
@@ -85,7 +85,9 @@ struct {
 		//函数测试 
 		showVT();
 		showVN();
-		DerivationL("((((S))))","S");
+		
+		puts("((((((S))))))");
+		error(DerivationL("((((((S))))))","S")==0?    1030:0);
 		//--------- 
 		
 		
@@ -122,22 +124,51 @@ struct {
 //	
 	//最左推导  最左推导出Rstr Rlen为结果字符串长度  S为起始符    输出推导过程 
 	
-	void DerivationL(const char * Rstr,char * S){
-		printf("Rstr:%s  S=%s \n",Rstr,S);
-		if(strlen(Rstr)<strlen(S)+1)return;
-		for(int i=0;Rstr[i]&&S[i];i++){
+	int DerivationL(const char * Rstr,char * S){
+		int i;
+		printf("→ %s ",S);
+//		printf("--%s %s    %d\n",Rstr,S,strcmp(Rstr,S));
+		if(strcmp(Rstr,S)==0){
+							puts(S) ;
+							puts("找到了");
+							return 1;
+						}
+		
+		if(strlen(Rstr)*2<strlen(S)+1)return 3;
+		for(i=0;Rstr[i]&&S[i];i++){
 			if(Rstr[i]==S[i])continue;
-			else if(checkSet(Rstr[i])==1 && checkSet(S[i])==1)break;
+			else if(checkSet(Rstr[i])==1 && checkSet(S[i])==1){
+					return 4; 
+			}
 			else if(checkSet(S[i])==2){
 				char p[255]={0};
-				for(int j=0;P[index(S[i])][j];j++){
+				for(int j=0;strcmp(P[index(S[i])][j],"-END")!=0;j++){
+					if(strcmp(P[index(S[i])][j],"")){
 						memset(p,0,sizeof(p));
 						strcpy(p,S) ;
 						strcpy(p+i,P[index(S[i])][j]);
 						strcat(p,S+i+1);
-						DerivationL(Rstr,p) ;	
-					
-					
+//						puts(p);
+					}else{
+						memset(p,0,sizeof(p));
+						strcpy(p,S) ;
+						strcpy(p+i,S+i+1);
+						puts(p);
+					} 
+							if(strcmp(Rstr,p)==0){
+								puts(p);
+							puts("已推导成功");
+							return 1;
+						}
+						switch(DerivationL(Rstr,p)){
+							case 0:return 0;//无法推导 
+							case 1:return 1;//推导成功
+							case 2:return 2;//致命错误
+							default : //忽略错误 继续迭代 
+								; 
+						}
+						printf("X->");
+						
 				}
 			}
 		}
@@ -239,7 +270,7 @@ struct {
 			
 			
 			case 1025:puts("检索失败，此元素不存在") ;break; 
-			
+			case 1030:puts("推导失败，给定句子不属于给定集合");break;
 			
 					
 			default :printf("程序崩溃，错误代码%x\n",err);
