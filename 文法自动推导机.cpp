@@ -5,13 +5,13 @@
 #define true 	1
 #define false 0
 #define EMPTY '\1'
-
+#define TESTSTR "0010"
 //定义EMPTY表示空串  空串用'\1'表示 
 //可以通过 #define 自定义元素  所有元素种类范围 0<x<256 
 struct {
 	const char VT[5]={
 	//VT终结符集合 
-	'(',')'		,EMPTY
+	'0','1'		,EMPTY
 	};
 	const char VN[5]={
 	//非终结符集合 
@@ -21,7 +21,7 @@ struct {
 	//产生式（按照VN中元素的顺序定义） 
 		{//VN[0]的产生式集合		
 //		"01","0S1"
-		"(S)","","-END"
+		"S1","S0","0","","-END"
 		}
 		/*
 		,
@@ -86,8 +86,8 @@ struct {
 		showVT();
 		showVN();
 		
-		puts("((((((S))))))");
-		error(DerivationL("((((((S))))))","S")==0?    1030:0);
+		puts(TESTSTR);
+		error(DerivationL(TESTSTR,"S")==0?    1030:0);
 		//--------- 
 		
 		
@@ -134,7 +134,7 @@ struct {
 							return 1;
 						}
 		
-		if(strlen(Rstr)*2<strlen(S)+1)return 3;
+		if(strlen(Rstr)<strlen(S)-1)return 3;
 		for(i=0;Rstr[i]&&S[i];i++){
 			if(Rstr[i]==S[i])continue;
 			else if(checkSet(Rstr[i])==1 && checkSet(S[i])==1){
@@ -153,13 +153,14 @@ struct {
 						memset(p,0,sizeof(p));
 						strcpy(p,S) ;
 						strcpy(p+i,S+i+1);
-						puts(p);
+//						puts(p);
 					} 
 							if(strcmp(Rstr,p)==0){
 								puts(p);
 							puts("已推导成功");
 							return 1;
 						}
+						if(strlen(Rstr)<strlen(S)-1)continue;
 						switch(DerivationL(Rstr,p)){
 							case 0:return 0;//无法推导 
 							case 1:return 1;//推导成功
@@ -172,6 +173,7 @@ struct {
 				}
 			}
 		}
+		return 1;
 	}
 	/*
 	void DerivationL(const char * Rstr,char * S){
